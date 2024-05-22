@@ -1,16 +1,24 @@
 import { useState, useEffect } from "react";
-import { Container, Text, VStack, IconButton, Code, Box } from "@chakra-ui/react";
+import { Container, Text, VStack, IconButton, Code, Box, Alert, AlertIcon } from "@chakra-ui/react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Index = () => {
   const [ip, setIp] = useState(null);
   const [showIp, setShowIp] = useState(false);
+  const [isAllowed, setIsAllowed] = useState(true);
 
   useEffect(() => {
     // Fetch the IP address
+    const allowedIps = ["fe80::c012:99bf:4962:6be3", "192.168.8.61", "2a02:9b0:4005:c9e4:fd67:8458:7a4:38c5", "2a02:9b0:4005:c9e4:60b8:d02f:3b15:2a37", "fda2:cd9b:9e3b:6300:f8d7:69e1:2c7d:c9ce", "fda2:cd9b:9e3b:6300:60b8:d02f:3b15:2a37"];
+
     fetch("https://api.ipify.org?format=json")
       .then((response) => response.json())
-      .then((data) => setIp(data.ip))
+      .then((data) => {
+        setIp(data.ip);
+        if (!allowedIps.includes(data.ip)) {
+          setIsAllowed(false);
+        }
+      })
       .catch((error) => console.error("Error fetching IP:", error));
   }, []);
 
@@ -21,6 +29,12 @@ const Index = () => {
   return (
     <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       <VStack spacing={4}>
+        {!isAllowed && (
+          <Alert status="error">
+            <AlertIcon />
+            Unauthorized IP address detected!
+          </Alert>
+        )}
         <Text fontSize="2xl">IP Address Tracker</Text>
         <Box display="flex" alignItems="center">
           <Text mr={2}>Your IP Address:</Text>
